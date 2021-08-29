@@ -1,3 +1,4 @@
+import ipaddress
 import json
 import logging
 import time
@@ -11,7 +12,6 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from pysonofflanr3 import sonoffcrypto
-from pysonofflanr3 import utils
 import socket
 
 
@@ -90,14 +90,14 @@ class SonoffLANModeClient:
         self.disconnected_event.set()
         self.my_service_name = None
 
-    def remove_service(self, zeroconf, type, name):
+    def remove_service(self, zeroconf, service_type, name):
 
         if self.my_service_name == name:
             self._info_cache = None
             self.logger.debug("Service %s flagged for removal" % name)
             self.loop.run_in_executor(None, self.retry_connection)
 
-    def add_service(self, zeroconf, type, name):
+    def add_service(self, zeroconf, service_type, name):
 
         if self.my_service_name is not None:
 
@@ -115,7 +115,7 @@ class SonoffLANModeClient:
         if self.my_service_name is None:
 
             info = zeroconf.get_service_info(type, name)
-            found_ip = utils.parseAddress(info.addresses[0])
+            found_ip = f'{ipaddress.ip_address(info.addresses[0])}'
 
             if self.device_id is not None:
 
@@ -152,7 +152,7 @@ class SonoffLANModeClient:
                 # process the initial message
                 self.update_service(zeroconf, type, name)
 
-    def update_service(self, zeroconf, type, name):
+    def update_service(self, zeroconf, service_type, name):
 
         data = None
 
@@ -162,8 +162,8 @@ class SonoffLANModeClient:
             return
 
         info = zeroconf.get_service_info(type, name)
-        found_ip = utils.parseAddress(info.addresses[0])
-        self.set_url(found_ip, str(info.port))
+        found_ip = ipaddress.ip_address(info.addresses[0])
+        self.set_url(found_ip, info.port)
 
         # Useful optimsation for 0.24.1 onwards (fixed in 0.24.5 though)
         # as multiple updates that are the same are received
@@ -377,9 +377,7 @@ class SonoffLANModeClient:
         return payload
 
     def set_url(self, ip, port):
-
-        socket_text = ip + ":" + port
-        self.url = "http://" + socket_text
+        self.url = f"http://{ip}:{port}"
         self.logger.debug("service is at %s", self.url)
 
     def create_http_session(self):
