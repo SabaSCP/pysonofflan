@@ -304,7 +304,7 @@ class SonoffDevice(object):
 
             response = json.loads(message.decode("utf-8"))
 
-            if self.client.type == b"strip":
+            if self.client.device_type == b"strip":
 
                 if self.outlet is None:
                     self.outlet = 0
@@ -314,10 +314,10 @@ class SonoffDevice(object):
                 ]
 
             elif (
-                self.client.type == b"plug"
-                or self.client.type == b"diy_plug"
-                or self.client.type == b"enhanced_plug"
-                or self.client.type == b"th_plug"
+                self.client.device_type == b"plug"
+                or self.client.device_type == b"diy_plug"
+                or self.client.device_type == b"enhanced_plug"
+                or self.client.device_type == b"th_plug"
             ):
 
                 switch_status = response["switch"]

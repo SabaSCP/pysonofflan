@@ -66,7 +66,7 @@ class SonoffLANModeClient:
         self.my_service_name = None
         self.last_request = None
         self.encrypted = False
-        self.type = None
+        self.device_type = None
         self._info_cache = None
         self._last_params = {"switch": "off"}
         self._times_added = 0
@@ -114,7 +114,7 @@ class SonoffLANModeClient:
 
         if self.my_service_name is None:
 
-            info = zeroconf.get_service_info(type, name)
+            info = zeroconf.get_service_info(service_type, name)
             found_ip = f'{ipaddress.ip_address(info.addresses[0])}'
 
             if self.device_id is not None:
@@ -143,14 +143,14 @@ class SonoffLANModeClient:
             if self.my_service_name is not None:
 
                 self.logger.info(
-                    "Service type %s of name %s added", type, name
+                    "Service type %s of name %s added", service_type, name
                 )
 
                 self.create_http_session()
                 self.set_retries(0)
 
                 # process the initial message
-                self.update_service(zeroconf, type, name)
+                self.update_service(zeroconf, service_type, name)
 
     def update_service(self, zeroconf, service_type, name):
 
@@ -161,7 +161,7 @@ class SonoffLANModeClient:
         if self.my_service_name != name:
             return
 
-        info = zeroconf.get_service_info(type, name)
+        info = zeroconf.get_service_info(service_type, name)
         found_ip = ipaddress.ip_address(info.addresses[0])
         self.set_url(found_ip, info.port)
 
@@ -177,8 +177,8 @@ class SonoffLANModeClient:
 
             self.logger.debug("properties: %s", info.properties)
 
-            self.type = info.properties.get(b"type")
-            self.logger.debug("type: %s", self.type)
+            self.device_type = info.properties.get(b"type")
+            self.logger.debug("type: %s", self.device_type)
 
             data1 = info.properties.get(b"data1")
             data2 = info.properties.get(b"data2")
@@ -280,7 +280,7 @@ class SonoffLANModeClient:
 
     def send_switch(self, request: Union[str, Dict]):
 
-        if self.type == b"strip":
+        if self.device_type == b"strip":
             response = self.send(request, self.url + "/zeroconf/switches")
         else:
             response = self.send(request, self.url + "/zeroconf/switch")
@@ -345,7 +345,7 @@ class SonoffLANModeClient:
 
         self._last_params = params
 
-        if self.type == b"strip" and params != {} and params is not None:
+        if self.device_type == b"strip" and params != {} and params is not None:
 
             if self.outlet is None:
                 self.outlet = 0
