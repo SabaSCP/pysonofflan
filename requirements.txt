@@ -1,0 +1,5 @@
+click==8.0.1
+click_log==0.3.2
+pycryptodome==3.10.1
+zeroconf==0.31.0
+requests==2.26.0

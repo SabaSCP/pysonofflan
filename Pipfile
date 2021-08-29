@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+click = ">=7.0"
+click-log = "*"
+pycryptodome = "*"
+requests = "*"
+zeroconf = "==0.31.0"
+
+[dev-packages]
+pysonofflanr3 = {editable = true, path = "."}
+
+[requires]
+python_version = "3.8"
