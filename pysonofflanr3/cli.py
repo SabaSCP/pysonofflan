@@ -210,11 +210,13 @@ def print_device_details(device):
         )
 
         logger.info(
-            "State: "
-            + click.style(
+            "State: %s, Temperature: %f, Humidity: %f",
+            click.style(
                 "ON" if device.is_on else "OFF",
                 fg="green" if device.is_on else "red",
-            )
+            ),
+            device.params.get('temperature'),
+            device.params.get('humidity')
         )
 
 

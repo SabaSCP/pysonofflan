@@ -39,7 +39,7 @@ class SonoffDevice(object):
         self.outlet = outlet
         self.shared_state = shared_state
         self.basic_info = None
-        self.params = {"switch": "unknown"}
+        self.params = {"switch": "unknown", 'temperature': 0.0, 'humidity': 0.0}
         self.loop = loop
         self.tasks = []
         self.new_loop = False
@@ -142,7 +142,7 @@ class SonoffDevice(object):
                 self.client.connected_event.clear()
 
                 # clear state so we know to send update when connection returns
-                self.params = {"switch": "unknown"}
+                self.params = {"switch": "unknown", 'temperature': 0.0, 'humidity': 0.0}
                 self.client._info_cache = None
 
                 self.logger.info(
@@ -372,7 +372,15 @@ class SonoffDevice(object):
                 )
 
                 if self.params["switch"] != switch_status:
-                    self.params = {"switch": switch_status}
+                    self.params["switch"] = switch_status
+                    send_update = True
+
+                if self.params['temperature'] != float(response.get('currentTemperature', 0.0)):
+                    self.params['temperature'] = float(response.get('currentTemperature', 0.0))
+                    send_update = True
+
+                if self.params['humidity'] != float(response.get('currentHumidity', 0.0)):
+                    self.params['humidity'] = float(response.get('currentHumidity', 0.0))
                     send_update = True
 
             if send_update and self.callback_after_update is not None:
